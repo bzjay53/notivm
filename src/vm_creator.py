@@ -1,3 +1,4 @@
+import os
 import time
 import logging
 import random
@@ -16,12 +17,27 @@ class VMCreator:
         self.oci_client = OCIClient(config)
         self.telegram_bot = TelegramBot(config)
         
-        # Retry configuration
-        self.retry_config = config.get("retry_config", {})
-        self.max_attempts = self.retry_config.get("max_attempts", 1000)
-        self.initial_wait = self.retry_config.get("initial_wait", 30)
-        self.max_wait = self.retry_config.get("max_wait", 300)
-        self.multiplier = self.retry_config.get("multiplier", 1.5)
+        # 리전별 최적화된 재시도 설정
+        self.region = os.getenv("OCI_REGION", "ap-seoul-1")
+        region_configs = config.get("region_configs", {})
+        region_config = region_configs.get(self.region, {})
+        
+        # 기본 설정
+        default_retry_config = config.get("retry_config", {})
+        
+        # 리전별 설정으로 오버라이드
+        self.max_attempts = region_config.get("max_attempts") or default_retry_config.get("max_attempts", 1000)
+        self.initial_wait = region_config.get("retry_interval") or default_retry_config.get("initial_wait", 30)
+        self.max_wait = default_retry_config.get("max_wait", 300)
+        self.multiplier = default_retry_config.get("multiplier", 1.5)
+        
+        # 리전 정보 로깅
+        if region_config:
+            self.logger.info(f"Region-optimized settings for {self.region}: "
+                           f"max_attempts={self.max_attempts}, "
+                           f"retry_interval={self.initial_wait}s")
+        else:
+            self.logger.warning(f"No region-specific config for {self.region}, using defaults")
         
         self.logger.info("VM Creator initialized")
     

@@ -1,14 +1,60 @@
+# 리전별 최적화 설정
+region_configs:
+  # 빠른 생성 리전
+  us-phoenix-1:
+    retry_interval: 30      # 빠른 재시도
+    max_attempts: 500
+    priority: "speed"
+    image_id: "ocid1.image.oc1.phx.aaaaaaaa2qlwy3nhlg2ddhx23j3r5fsdgrmqswz6wt37hbwqm4xhzv6nqv4q"
+    description: "US West (Phoenix) - 최고 속도"
+    
+  us-ashburn-1:
+    retry_interval: 35
+    max_attempts: 600
+    priority: "speed"
+    image_id: "ocid1.image.oc1.iad.aaaaaaaa27yyzgbj4h5m4pfw5cz66y7m6dqnqvqxh7kpq3ouvzb3mvp6bjdq"
+    description: "US East (Ashburn) - 안정적"
+    
+  # 균형형 리전 (한국 사용자 추천)
+  ap-tokyo-1:
+    retry_interval: 45      # 중간 재시도
+    max_attempts: 800
+    priority: "balanced"
+    image_id: "ocid1.image.oc1.ap-tokyo-1.aaaaaaaa64kfmwuhkz2mv7ngryz6ulze5ez7j7xbhdeq4jrflipqopaq"
+    description: "Japan East (Tokyo) - 한국 사용자 추천"
+    
+  ap-osaka-1:
+    retry_interval: 50
+    max_attempts: 900
+    priority: "balanced"
+    image_id: "ocid1.image.oc1.ap-osaka-1.aaaaaaaa64kfmwuhkz2mv7ngryz6ulze5ez7j7xbhdeq4jrflipqopaq"
+    description: "Japan Central (Osaka) - 도쿄 대안"
+    
+  ap-singapore-1:
+    retry_interval: 55
+    max_attempts: 800
+    priority: "balanced"
+    image_id: "ocid1.image.oc1.ap-singapore-1.aaaaaaaa64kfmwuhkz2mv7ngryz6ulze5ez7j7xbhdeq4jrflipqopaq"
+    description: "Singapore - 아시아 중심"
+    
+  # 느린 리전 (비추천)
+  ap-seoul-1:
+    retry_interval: 120     # 느린 재시도
+    max_attempts: 2000
+    priority: "patient"
+    image_id: "ocid1.image.oc1.ap-seoul-1.aaaaaaaa64kfmwuhkz2mv7ngryz6ulze5ez7j7xbhdeq4jrflipqopaq"
+    description: "South Korea Central (Seoul) - 비추천"
+
 vm_config:
   shape: "VM.Standard.A1.Flex"
   availability_domain: null  # Will be auto-detected
-  image_id: "ocid1.image.oc1.ap-seoul-1.aaaaaaaa64kfmwuhkz2mv7ngryz6ulze5ez7j7xbhdeq4jrflipqopaq"  # Ubuntu 22.04 ARM
   subnet_id: null  # Will be auto-detected or created
   
 retry_config:
-  initial_wait: 30  # seconds
+  initial_wait: 30  # seconds (기본값, 리전별 설정으로 오버라이드)
   max_wait: 300     # seconds
   multiplier: 1.5
-  max_attempts: 1000
+  max_attempts: 1000  # 기본값, 리전별 설정으로 오버라이드
 
 notification_config:
   success_message: "🎉 Oracle Cloud VM 생성 성공!\n인스턴스: {instance_name}\nIP: {public_ip}\n생성 시간: {created_time}"

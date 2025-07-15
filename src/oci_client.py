@@ -10,13 +10,17 @@ class OCIClient:
         self.logger = logging.getLogger(__name__)
         
         # OCI configuration
+        self.region = os.getenv("OCI_REGION", "ap-seoul-1")
         self.oci_config = {
             "user": os.getenv("OCI_USER_OCID"),
             "key_file": os.getenv("OCI_PRIVATE_KEY_PATH"),
             "fingerprint": os.getenv("OCI_FINGERPRINT"),
             "tenancy": os.getenv("OCI_TENANCY_OCID"),
-            "region": os.getenv("OCI_REGION", "ap-seoul-1")
+            "region": self.region
         }
+        
+        # 리전별 설정 로드
+        self.region_config = self.get_region_config()
         
         # Initialize clients
         self.compute_client = oci.core.ComputeClient(self.oci_config)
@@ -29,6 +33,37 @@ class OCIClient:
         self._compartment_id = os.getenv("VM_COMPARTMENT_OCID") or self.oci_config["tenancy"]
         
         self.logger.info(f"OCI Client initialized for region: {self.oci_config['region']}")
+        if self.region_config:
+            self.logger.info(f"Region config loaded: {self.region_config['description']}")
+    
+    def get_region_config(self) -> Optional[Dict[str, Any]]:
+        """Get region-specific configuration"""
+        region_configs = self.config.get("region_configs", {})
+        region_config = region_configs.get(self.region)
+        
+        if region_config:
+            self.logger.info(f"Using region-specific config for {self.region}")
+            return region_config
+        else:
+            self.logger.warning(f"No region-specific config found for {self.region}, using defaults")
+            return None
+    
+    def get_optimized_image_id(self) -> str:
+        """Get region-optimized image ID"""
+        if self.region_config and "image_id" in self.region_config:
+            return self.region_config["image_id"]
+        
+        # Fallback to default Ubuntu 22.04 ARM image ID for the region
+        default_images = {
+            "us-phoenix-1": "ocid1.image.oc1.phx.aaaaaaaa2qlwy3nhlg2ddhx23j3r5fsdgrmqswz6wt37hbwqm4xhzv6nqv4q",
+            "us-ashburn-1": "ocid1.image.oc1.iad.aaaaaaaa27yyzgbj4h5m4pfw5cz66y7m6dqnqvqxh7kpq3ouvzb3mvp6bjdq",
+            "ap-tokyo-1": "ocid1.image.oc1.ap-tokyo-1.aaaaaaaa64kfmwuhkz2mv7ngryz6ulze5ez7j7xbhdeq4jrflipqopaq",
+            "ap-osaka-1": "ocid1.image.oc1.ap-osaka-1.aaaaaaaa64kfmwuhkz2mv7ngryz6ulze5ez7j7xbhdeq4jrflipqopaq",
+            "ap-singapore-1": "ocid1.image.oc1.ap-singapore-1.aaaaaaaa64kfmwuhkz2mv7ngryz6ulze5ez7j7xbhdeq4jrflipqopaq",
+            "ap-seoul-1": "ocid1.image.oc1.ap-seoul-1.aaaaaaaa64kfmwuhkz2mv7ngryz6ulze5ez7j7xbhdeq4jrflipqopaq"
+        }
+        
+        return default_images.get(self.region, default_images["ap-seoul-1"])
     
     def get_availability_domains(self) -> List[str]:
         """Get available availability domains"""
@@ -119,7 +154,7 @@ class OCIClient:
                     memory_in_gbs=memory_gb
                 ),
                 source_details=oci.core.models.InstanceSourceViaImageDetails(
-                    image_id=self.config["vm_config"]["image_id"],
+                    image_id=self.get_optimized_image_id(),
                     boot_volume_size_in_gbs=boot_volume_size
                 ),
                 create_vnic_details=oci.core.models.CreateVnicDetails(
