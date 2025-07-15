@@ -1,0 +1,20 @@
+vm_config:
+  shape: "VM.Standard.A1.Flex"
+  availability_domain: null  # Will be auto-detected
+  image_id: "ocid1.image.oc1.ap-seoul-1.aaaaaaaa64kfmwuhkz2mv7ngryz6ulze5ez7j7xbhdeq4jrflipqopaq"  # Ubuntu 22.04 ARM
+  subnet_id: null  # Will be auto-detected or created
+  
+retry_config:
+  initial_wait: 30  # seconds
+  max_wait: 300     # seconds
+  multiplier: 1.5
+  max_attempts: 1000
+
+notification_config:
+  success_message: "🎉 Oracle Cloud VM 생성 성공!\n인스턴스: {instance_name}\nIP: {public_ip}\n생성 시간: {created_time}"
+  error_message: "❌ VM 생성 실패: {error_message}"
+  progress_message: "⏳ VM 생성 시도 중... (시도 #{attempt}/{max_attempts})"
+  
+logging_config:
+  format: "%(asctime)s - %(levelname)s - %(message)s"
+  date_format: "%Y-%m-%d %H:%M:%S"

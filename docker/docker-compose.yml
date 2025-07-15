@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  notivm:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: notivm
+    restart: unless-stopped
+    volumes:
+      - ../config:/app/config
+      - ../logs:/app/logs
+      - ./oci_api_key.pem:/app/config/oci_api_key.pem:ro
+    environment:
+      - ENV_FILE=/app/config/.env
+    ports:
+      - "8080:8080"
+    networks:
+      - notivm_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  notivm_network:
+    driver: bridge
