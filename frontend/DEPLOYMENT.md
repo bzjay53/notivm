@@ -15,13 +15,13 @@
 
 #### 첫 번째 환경변수
 - **Name**: `NEXT_PUBLIC_SUPABASE_URL`
-- **Value**: `https://llytukvdaeeypqshqczo.supabase.co`
+- **Value**: `YOUR_SUPABASE_PROJECT_URL_HERE`
 - **Environment**: **Production, Preview, Development** 모두 체크
 - **"Add"** 버튼 클릭
 
 #### 두 번째 환경변수
 - **Name**: `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- **Value**: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxseXR1a3ZkYWVleXBxc2hxY3pvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NzkyNjQsImV4cCI6MjA2ODU1NTI2NH0.bfxl0pptEHJ3DypkWTUJw4Y2yYJ9gi3FLbIEk-D_QFs`
+- **Value**: `YOUR_SUPABASE_ANON_KEY_HERE`
 - **Environment**: **Production, Preview, Development** 모두 체크
 - **"Add"** 버튼 클릭
 
