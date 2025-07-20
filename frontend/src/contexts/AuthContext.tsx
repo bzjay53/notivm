@@ -52,34 +52,67 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   })
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    })
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password
+      })
 
-    if (error) {
-      return { error: error.message }
+      if (error) {
+        console.error('Sign in error:', error)
+        return { error: getErrorMessage(error.message) }
+      }
+
+      return { data }
+    } catch (err) {
+      console.error('Sign in exception:', err)
+      return { error: '로그인 중 오류가 발생했습니다' }
     }
+  }
 
-    return {}
+  const getErrorMessage = (message: string): string => {
+    if (message.includes('Invalid login credentials')) {
+      return '이메일 또는 비밀번호가 올바르지 않습니다'
+    }
+    if (message.includes('User already registered')) {
+      return '이미 등록된 이메일입니다'
+    }
+    if (message.includes('Password should be at least')) {
+      return '비밀번호는 최소 6자 이상이어야 합니다'
+    }
+    if (message.includes('Unable to validate email address')) {
+      return '올바른 이메일 주소를 입력해주세요'
+    }
+    return message
   }
 
   const signUp = async (email: string, password: string, displayName: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          display_name: displayName
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: {
+            display_name: displayName.trim()
+          }
         }
+      })
+
+      if (error) {
+        console.error('Sign up error:', error)
+        return { error: getErrorMessage(error.message) }
       }
-    })
 
-    if (error) {
-      return { error: error.message }
+      // 이메일 확인이 필요한 경우
+      if (data.user && !data.session) {
+        return { error: '이메일 확인이 필요합니다. 이메일을 확인해주세요.' }
+      }
+
+      return { data }
+    } catch (err) {
+      console.error('Sign up exception:', err)
+      return { error: '회원가입 중 오류가 발생했습니다' }
     }
-
-    return {}
   }
 
   const signOut = async () => {
