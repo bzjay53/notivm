@@ -5,13 +5,18 @@ import {
   CloudIcon,
   CheckCircleIcon,
   ClockIcon,
-  CpuChipIcon
+  CpuChipIcon,
+  UserIcon
 } from '@heroicons/react/24/outline'
+import { useAuth } from '@/contexts/AuthContext'
+import AuthModal from '@/components/AuthModal'
 
 export default function HomePage() {
+  const { user, signOut, loading } = useAuth()
   const [isCreating, setIsCreating] = useState(false)
   const [progress, setProgress] = useState(0)
   const [attempts, setAttempts] = useState(0)
+  const [showAuthModal, setShowAuthModal] = useState(false)
 
   const [vmConfig, setVmConfig] = useState({
     region: 'us-phoenix-1',
@@ -71,6 +76,10 @@ export default function HomePage() {
   ]
 
   const handleStartCreation = () => {
+    if (!user) {
+      setShowAuthModal(true)
+      return
+    }
     setIsCreating(true)
     setProgress(0)
     setAttempts(0)
@@ -102,6 +111,33 @@ export default function HomePage() {
                 <div className="text-sm font-semibold text-gray-700">ARM VM 생성</div>
                 <div className="text-xs text-gray-500">무료 Tier 24/7 자동화</div>
               </div>
+              
+              {loading ? (
+                <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+              ) : user ? (
+                <div className="flex items-center space-x-3">
+                  <div className="text-right">
+                    <div className="text-sm font-semibold text-gray-700">{user.displayName}</div>
+                    <div className="text-xs text-gray-500">{user.email}</div>
+                  </div>
+                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                    <UserIcon className="w-6 h-6 text-white" />
+                  </div>
+                  <button
+                    onClick={signOut}
+                    className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    로그아웃
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setShowAuthModal(true)}
+                  className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all duration-200"
+                >
+                  로그인
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -175,22 +211,36 @@ export default function HomePage() {
               </div>
 
               {/* 생성/중지 버튼 */}
-              <div className="flex space-x-3">
-                {!isCreating ? (
-                  <button
-                    onClick={handleStartCreation}
-                    className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-600 hover:to-indigo-700 transition-all duration-200"
-                  >
-                    🚀 VM 생성 시작
-                  </button>
-                ) : (
-                  <button
-                    onClick={handleStopCreation}
-                    className="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-red-600 hover:to-red-700 transition-all duration-200"
-                  >
-                    ⏹️ 생성 중지
-                  </button>
+              <div className="flex flex-col space-y-3">
+                {!user && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                    <p className="text-sm text-amber-700">
+                      🔐 VM 생성을 위해 로그인이 필요합니다
+                    </p>
+                  </div>
                 )}
+                
+                <div className="flex space-x-3">
+                  {!isCreating ? (
+                    <button
+                      onClick={handleStartCreation}
+                      className={`flex-1 py-3 px-4 rounded-lg font-semibold transition-all duration-200 ${
+                        user 
+                          ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700'
+                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      }`}
+                    >
+                      🚀 VM 생성 시작
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleStopCreation}
+                      className="flex-1 bg-gradient-to-r from-red-500 to-red-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-red-600 hover:to-red-700 transition-all duration-200"
+                    >
+                      ⏹️ 생성 중지
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -372,6 +422,12 @@ export default function HomePage() {
           </div>
         </div>
       </main>
+
+      {/* 인증 모달 */}
+      <AuthModal 
+        isOpen={showAuthModal} 
+        onClose={() => setShowAuthModal(false)} 
+      />
     </div>
   );
 }
