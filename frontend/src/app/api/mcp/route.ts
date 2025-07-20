@@ -219,7 +219,7 @@ VM 생성을 다시 시작하려면 'start_vm_creation' 도구를 사용하세�
       },
       async (config) => {
         const updatedFields = Object.entries(config)
-          .filter(([_, value]) => value !== undefined)
+          .filter(([, value]) => value !== undefined)
           .map(([key, value]) => `- ${key}: ${key.includes('Token') || key.includes('Ocid') ? '***' : value}`)
           .join('\n');
 

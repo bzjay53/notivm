@@ -47,7 +47,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         setDisplayName('')
         setError('')
       }
-    } catch (err) {
+    } catch {
       setError('예상치 못한 오류가 발생했습니다')
     } finally {
       setLoading(false)
