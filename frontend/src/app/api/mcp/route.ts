@@ -280,13 +280,7 @@ ${updatedFields}
         };
       }
     );
-  },
-  {
-    name: 'notivm-oracle-vm-creator',
-    version: '1.0.0',
-    description: 'Oracle Cloud VM 자동 생성 및 관리 도구',
-  },
-  { basePath: '/api' }
+  }
 );
 
 // 헬퍼 함수들
